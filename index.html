@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="A benchmark of Geospatial Foundation Models for global-scale above-ground biomass estimation on the AGBD dataset. We compare GFMs run as frozen encoders against pre-computed embedding products (AlphaEarth Foundations, TESSERA) and a fully supervised baseline.">
+  <meta name="keywords" content="Above-ground biomass, Geospatial Foundation Models, Remote Sensing, Embeddings, AlphaEarth, TESSERA, AGBD, PANGAEA">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="index, follow">
+  <title>Above-ground Biomass Estimation with Geospatial Foundation Models</title>
+
+  <meta property="og:title" content="Above-ground Biomass Estimation with Geospatial Foundation Models">
+  <meta property="og:description" content="A benchmark of GFMs and pre-computed embedding products for global-scale biomass estimation.">
+  <meta property="og:type" content="article">
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/twentytwenty.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <link rel="icon" href="./static/images/icon.png">
+
+  <script src="./js/jquery-3.2.1.min.js"></script>
+  <script src="./js/fontawesome.all.min.js"></script>
+
+  <!--MathJax-->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    /* Result tables */
+    .results-table-wrap { overflow-x: auto; }
+    table.results {
+      border-collapse: collapse;
+      margin: 0 auto 0.4rem auto;
+      font-size: 0.92rem;
+      width: 100%;
+    }
+    table.results th, table.results td {
+      padding: 0.42rem 0.7rem;
+      text-align: center;
+      border-bottom: 1px solid #e6e6e6;
+      white-space: nowrap;
+    }
+    table.results thead th {
+      border-bottom: 2px solid #363636;
+      font-weight: 700;
+    }
+    table.results tbody tr:last-child td { border-bottom: 2px solid #363636; }
+    table.results td.left, table.results th.left { text-align: left; }
+    table.results .best { font-weight: 700; }
+    table.results .second { text-decoration: underline; }
+    table.results .grouphead td {
+      text-align: left;
+      font-style: italic;
+      color: #555;
+      background: #fafafa;
+      border-bottom: 1px solid #e6e6e6;
+    }
+    table.results .std { color: #888; font-size: 0.8rem; }
+    .table-caption { font-size: 0.82rem; color: #555; margin-top: 0.3rem; }
+    .key-findings { margin-top: 1.2rem; }
+    .finding-card {
+      border: 1px solid #ececec;
+      border-radius: 12px;
+      padding: 1.1rem 1.2rem;
+      height: 100%;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .finding-card .icon-top { font-size: 1.6rem; margin-bottom: 0.4rem; }
+    .finding-card h3 { font-weight: 700; margin-bottom: 0.4rem; font-size: 1.02rem; }
+    .finding-card p { font-size: 0.9rem; color: #444; }
+    .highlight-num { color: #1D9E75; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 is-size-3-mobile publication-title">Above-ground Biomass Estimation with Geospatial Foundation Models</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="https://ghjuliasialelli.github.io/">Ghjulia Sialelli</a><sup>🛰️🤖</sup>,</span>
+            <span class="author-block">
+              <a href="#">Linus Scheibenreif</a><sup>🛰️</sup>,</span>
+            <span class="author-block">
+              <a href="https://dm3l.uzh.ch/wegner/group-leader">Jan Dirk Wegner</a><sup>🌲</sup>,</span>
+            <span class="author-block">
+              <a href="https://scholar.google.ch/citations?user=FZuNgqIAAAAJ&hl=en">Konrad Schindler</a><sup>🛰️🤖</sup></span>
+          </div>
+
+          <div class="is-size-5 publication-authors footer-section">
+            <span class="author-block-footer"><sup>🛰️</sup>Photogrammetry and Remote Sensing, ETH Zurich</span>
+            <span class="author-block-footer"><sup>🌲</sup>EcoVision Lab, University of Zurich</span>
+            <span class="author-block-footer"><sup>🤖</sup>ETH AI Center</span>
+          </div>
+
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <!-- arXiv -->
+              <span class="link-block">
+                <a href="#" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- PDF -->
+              <span class="link-block">
+                <a href="#" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>PDF</span>
+                </a>
+              </span>
+              <!-- Code -->
+              <span class="link-block">
+                <a href="https://github.com/VMarsocci/pangaea-bench" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <!-- Dataset -->
+              <span class="link-block">
+                <a href="https://huggingface.co/datasets/prs-eth/AGBD" target="_blank" rel="noopener noreferrer"
+                    class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">&#129303;</span>
+                  <span>Dataset</span>
+                </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TEASER / KEY MESSAGE -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <!-- To use the pipeline figure, drop overview.png into static/imgs/ and uncomment:
+      <img id="overview" width="100%" src="./static/imgs/overview.png" alt="Overview of the pipeline"/>
+      -->
+      <h2 class="subtitle has-text-centered">
+        For global-scale biomass regression, what matters is <b>not</b> whether a foundation model is frozen or fine-tuned,
+        but <b>how it is served</b>: GFMs run as frozen encoders underperform, while
+        <b>pre-computed embedding products</b> (AlphaEarth Foundations, TESSERA) are remarkably effective.
+      </h2>
+    </div>
+  </div>
+</section>
+
+<!-- ABSTRACT -->
+<section class="section pt-0 pb-4">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 is-spaced">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Accurate estimation of Above-Ground Biomass (AGB) from satellite imagery is essential for wide-area
+            monitoring of carbon stocks, yet it remains a challenging regression task at global scale.
+            Geospatial Foundation Models (GFMs) have recently emerged as a promising machine learning paradigm to
+            derive general-purpose representations from Earth observation data, but their utility for quantitative
+            regression tasks like biomass estimation remains largely unexplored, as most benchmarks emphasize
+            classification and segmentation. Here, we present a comprehensive benchmark of GFMs for global-scale AGB
+            estimation using the AGBD dataset. We distinguish two ways in which GFMs reach practitioners: models
+            distributed as <b>weights</b> to be run by the user, which we evaluate as frozen encoders within the
+            PANGAEA framework, and models distributed as ready-to-use <b>pre-computed embedding products</b>, for which
+            we evaluate AlphaEarth Foundations (AEF) and TESSERA. We compare 11 GFMs and both embedding products against
+            a fully supervised state-of-the-art (SOTA) model, and assess geographical and temporal generalization as
+            well as agreement with the ESA CCI biomass product on independent reference data. Our results show that this
+            distinction, rather than the frozen-versus-fine-tuned axis, is what matters: GFMs run as frozen encoders
+            substantially underperform the supervised SOTA model, whereas pre-computed embedding products prove highly
+            effective. An MLP trained on AEF embeddings outperforms the supervised SOTA model trained on AGBD features,
+            and the same SOTA model trained on AEF embeddings achieves the best overall result, while also generalizing
+            better across space and time.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- KEY FINDINGS -->
+<section class="section pt-0">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths" style="width:100%;">
+        <h2 class="title is-3">Key findings</h2>
+        <div class="columns key-findings">
+          <div class="column">
+            <div class="finding-card">
+              <div class="icon-top">🧊</div>
+              <h3>Frozen GFMs underperform</h3>
+              <p>Every GFM evaluated as a frozen encoder in PANGAEA lags behind the fully supervised baseline. The best,
+              SSL4EO-MoCo (<span class="highlight-num">60.56</span> Mg/ha), is beaten even by a simple MLP on AEF embeddings.</p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="finding-card">
+              <div class="icon-top">🛰️</div>
+              <h3>Embedding products win</h3>
+              <p><code>fcn_film</code> on AEF<sup>+</sup> gives the best result (<span class="highlight-num">50.79</span> Mg/ha),
+              and even an MLP on AEF (52.22) beats the supervised model on raw AGBD features (53.73).</p>
+            </div>
+          </div>
+          <div class="column">
+            <div class="finding-card">
+              <div class="icon-top">🌍</div>
+              <h3>On par with ESA CCI</h3>
+              <p>Trained on just 11 regions, our AEF model reaches near-parity with the globally-calibrated ESA CCI
+              product on independent AGBRef data, with stronger spatial and temporal generalization.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MAIN RESULTS -->
+<section class="section pt-0">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths" style="width:100%;">
+        <h2 class="title is-3">Main benchmark results</h2>
+        <div class="content has-text-justified">
+          <p>
+            Test RMSE on the full AGBD dataset. All models are trained end-to-end on the full dataset, except the GFM,
+            for which only the decoder head is trained. <b>Pre-computed embeddings are the most informative input</b>:
+            training the supervised <code>fcn_film</code> model on AEF instead of raw AGBD features lowers error from
+            53.73 to 50.92 Mg/ha, and augmenting AEF with a few ancillary layers (AEF<sup>+</sup>) is best overall.
+          </p>
+        </div>
+        <div class="results-table-wrap">
+          <table class="results">
+            <thead>
+              <tr><th class="left">Model</th><th>Features</th><th>RMSE (&darr;)</th></tr>
+            </thead>
+            <tbody>
+              <tr class="grouphead"><td colspan="3">Baseline (fully supervised)</td></tr>
+              <tr><td class="left"><code>fcn_film</code></td><td>AGBD</td><td>53.73 <span class="std">± 0.02</span></td></tr>
+              <tr><td class="left"><code>fcn_film</code></td><td>S2 only</td><td>58.57 <span class="std">± 0.03</span></td></tr>
+              <tr class="grouphead"><td colspan="3">Embeddings</td></tr>
+              <tr><td class="left">Linear Probe</td><td>AEF</td><td>60.46 <span class="std">± 0.17</span></td></tr>
+              <tr><td class="left">MLP</td><td>AEF</td><td>52.22 <span class="std">± 0.02</span></td></tr>
+              <tr><td class="left"><code>fcn_film</code></td><td>AEF</td><td class="second">50.92 <span class="std">± 0.02</span></td></tr>
+              <tr><td class="left"><code>fcn_film</code></td><td>AEF<sup>+</sup></td><td class="best">50.79 <span class="std">± 0.01</span></td></tr>
+              <tr class="grouphead"><td colspan="3">GFM (best)</td></tr>
+              <tr><td class="left">SSL4EO-MoCo</td><td>S2 only</td><td>60.56</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">Table 1. Test RMSE (Mg/ha, &darr;) on the full dataset. Mean ± std over 3 runs (except GFM).
+        <b>Best</b> in bold, <span class="second">second best</span> underlined.</p>
+
+        <div class="publication-results" style="margin-top:2rem;">
+          <img width="100%" src="./static/imgs/density.png" alt="Density scatter of predicted vs. GEDI reference AGB"/>
+          <p class="table-caption has-text-centered">Figure 1. Density scatter of predicted vs. GEDI reference AGB for <code>fcn_film</code> trained on
+          AGBD features (left) and AEF embeddings (right). AEF improves the correlation (r: 0.844&rarr;0.862, R&sup2;: 0.712&rarr;0.742).</p>
+        </div>
+
+        <div class="publication-results" style="margin-top:2rem;">
+          <img width="100%" src="./static/imgs/binned.png" alt="Test residuals stratified by AGB bin"/>
+          <p class="table-caption has-text-centered">Figure 2. Test residuals (AGB<sub>pred</sub> &minus; AGB<sub>true</sub>) by reference AGB bin.
+          Both models underestimate high biomass (saturation), but AEF (orange) reduces the magnitude across almost all bins.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GFM BENCHMARK -->
+<section class="section pt-0">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths" style="width:100%;">
+        <h2 class="title is-3">GFM leaderboard</h2>
+        <div class="content has-text-justified">
+          <p>
+            All 11 Sentinel-2-compatible GFMs in PANGAEA, evaluated with frozen encoders and a trained UPerNet decoder
+            on AGBD&nbsp;Lite. Even the strongest GFM stays well above the embedding-based models in the table above,
+            underscoring that off-the-shelf frozen features are not yet competitive for this regression task.
+          </p>
+        </div>
+        <div class="results-table-wrap">
+          <table class="results" style="max-width:460px;">
+            <thead><tr><th class="left">Model</th><th>Lite RMSE (&darr;)</th></tr></thead>
+            <tbody>
+              <tr><td class="left">SSL4EO-MoCo</td><td class="best">64.34</td></tr>
+              <tr><td class="left">Prithvi-2</td><td class="second">66.43</td></tr>
+              <tr><td class="left">CROMA</td><td>66.57</td></tr>
+              <tr><td class="left">SatlasNet</td><td>69.20</td></tr>
+              <tr><td class="left">SpectralGPT</td><td>71.23</td></tr>
+              <tr><td class="left">TerraMind</td><td>74.50</td></tr>
+              <tr><td class="left">DOFA</td><td>75.24</td></tr>
+              <tr><td class="left">RemoteCLIP</td><td>78.17</td></tr>
+              <tr><td class="left">Prithvi</td><td>78.25</td></tr>
+              <tr><td class="left">GFM-Swin</td><td>78.52</td></tr>
+              <tr><td class="left">ScaleMAE</td><td>87.39</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">Table 2. AGBD Lite test RMSE (Mg/ha, &darr;), Sentinel-2 only, sorted by RMSE.
+        <b>Best</b> in bold, <span class="second">second best</span> underlined.</p>
+
+        <div class="publication-results" style="margin-top:2rem;">
+          <img width="100%" src="./static/imgs/throughput.png" alt="RMSE vs. inference throughput for all GFMs"/>
+          <p class="table-caption has-text-centered">Figure 3. Accuracy/efficiency trade-off: AGBD Lite RMSE vs. inference throughput,
+          colored by GPU-hours needed to fine-tune. The fully supervised model matches or beats every GFM at a fraction of the compute.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GENERALIZATION -->
+<section class="section pt-0">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths" style="width:100%;">
+        <h2 class="title is-3">Geographical &amp; temporal generalization</h2>
+        <div class="content has-text-justified">
+          <p>
+            AEF embeddings do not just improve average accuracy &mdash; they generalize better. Under
+            <i>cross-region</i> zero-shot transfer, AEF<sup>+</sup> cuts RMSE by 17&ndash;25% in Africa and South America.
+            Where the plain AEF encoder fails on out-of-distribution South Asia, AEF<sup>+</sup> (which keeps a few raw
+            features) recovers robustness.
+          </p>
+        </div>
+        <div class="results-table-wrap">
+          <table class="results">
+            <thead>
+              <tr><th class="left">Region</th><th>Features</th><th>cross-region</th><th>within-region</th><th>general</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="left" rowspan="3">Africa</td><td>AGBD</td><td>40.79</td><td>31.42</td><td>31.47</td></tr>
+              <tr><td>AEF</td><td class="second">35.08</td><td class="second">29.17</td><td class="best">29.21</td></tr>
+              <tr><td>AEF<sup>+</sup></td><td class="best">33.72</td><td class="best">29.13</td><td class="second">29.24</td></tr>
+              <tr><td class="left" rowspan="3">South Asia</td><td>AGBD</td><td class="best">79.28</td><td>77.17</td><td>73.65</td></tr>
+              <tr><td>AEF</td><td>99.34</td><td class="best">69.44</td><td class="best">69.75</td></tr>
+              <tr><td>AEF<sup>+</sup></td><td class="second">80.85</td><td class="second">69.50</td><td class="second">70.49</td></tr>
+              <tr><td class="left" rowspan="3">South America</td><td>AGBD</td><td>42.40</td><td>28.85</td><td>27.77</td></tr>
+              <tr><td>AEF</td><td class="second">32.05</td><td class="second">25.62</td><td class="best">25.61</td></tr>
+              <tr><td>AEF<sup>+</sup></td><td class="best">32.02</td><td class="best">25.56</td><td class="second">25.62</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">Table 3. Geographical generalization, test RMSE (Mg/ha, &darr;).
+        <b>cross-region</b>: trained without the target region; <b>within-region</b>: trained only on it;
+        <b>general</b>: trained on all regions. <b>Best</b> bold, <span class="second">second</span> underlined.</p>
+
+        <div class="results-table-wrap" style="margin-top:2rem;">
+          <table class="results" style="max-width:560px;">
+            <thead>
+              <tr><th class="left">Features</th><th>all years</th><th>cross-year</th><th>within-year</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="left">AGBD</td><td>53.29</td><td>59.12</td><td>52.20</td></tr>
+              <tr><td class="left">AEF</td><td class="second">50.64</td><td class="best">52.23</td><td class="second">51.05</td></tr>
+              <tr><td class="left">AEF<sup>+</sup></td><td class="best">50.52</td><td class="second">52.52</td><td class="best">50.92</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">Table 4. Temporal generalization, test RMSE (Mg/ha, &darr;) on 2020 data.
+        AEF/AEF<sup>+</sup> trained on 2019 alone (<i>cross-year</i>) still beat AGBD trained on both years.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGBREF COMPARISON -->
+<section class="section pt-0">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths" style="width:100%;">
+        <h2 class="title is-3">Comparison with ESA CCI on independent data</h2>
+        <div class="content has-text-justified">
+          <p>
+            Evaluated against the independent AGBRef reference dataset (aggregated to 10&nbsp;km), our <code>fcn_film</code>&nbsp;&times;&nbsp;AEF
+            model reaches near-parity with the globally-calibrated ESA CCI biomass product &mdash; despite being trained on
+            only the 11 AGBD regions. In the like-for-like <i>Subset</i> comparison the two are essentially tied on
+            R&sup2; and RMSE, while our model shows lower bias.
+          </p>
+        </div>
+        <div class="results-table-wrap">
+          <table class="results">
+            <thead>
+              <tr><th class="left">Plots</th><th class="left">Model</th><th>R&sup2;</th><th>r</th><th>RMSE</th><th>MAE</th><th>ME</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="left" rowspan="2">All</td><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">0.563</td><td>0.754</td><td class="best">44.74</td><td>28.26</td><td class="best">&minus;0.59</td></tr>
+              <tr><td class="left">ESA CCI</td><td>0.543</td><td class="best">0.763</td><td>45.80</td><td class="best">26.77</td><td>&minus;3.09</td></tr>
+              <tr><td class="left" rowspan="2">Subset</td><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">0.689</td><td>0.835</td><td class="best">34.71</td><td>24.34</td><td>4.95</td></tr>
+              <tr><td class="left">ESA CCI</td><td>0.687</td><td class="best">0.858</td><td>34.82</td><td class="best">21.86</td><td class="best">1.94</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">Table 5. Our AGB predictions vs. ESA CCI, evaluated against AGBRef.
+        <i>All</i>: all plots except Japan; <i>Subset</i>: plots within 1500&nbsp;km of an AGBD region.
+        <b>Best</b> per column in bold.</p>
+
+        <div class="publication-results" style="margin-top:2rem;">
+          <img width="100%" src="./static/imgs/agbref_density.png" alt="Global distribution of AGBRef reference plots"/>
+          <p class="table-caption has-text-centered">Figure 4. Spatial distribution of the independent AGBRef reference plots used for this evaluation
+          (H3 hexagonal grid).</p>
+        </div>
+
+        <div class="publication-results" style="margin-top:2rem;">
+          <img width="100%" src="./static/imgs/agbref.png" alt="Predicted vs. AGBRef AGB for our model and ESA CCI"/>
+          <p class="table-caption has-text-centered">Figure 5. Predicted vs. AGBRef reference AGB for our <code>fcn_film</code>&nbsp;&times;&nbsp;AEF model (left) and ESA CCI (right).
+          Top: per-plot scatter; bottom: binned means with spread. Both saturate at high biomass, tracking the 1:1 line closely below ~150 t/ha.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CITATION -->
+<section class="section" id="BibTeX">
+  <div class="container is-max-desktop content">
+    <h2 class="title">Citation</h2>
+    <p>If you find our work helpful, consider citing our paper 🙂</p>
+    <pre><code>@article{Sialelli2026GFMAGB,
+  title   = {Above-ground Biomass Estimation with Geospatial Foundation Models},
+  author  = {Sialelli, Ghjulia and Scheibenreif, Linus and Wegner, Jan Dirk and Schindler, Konrad},
+  journal = {Remote Sensing of Environment (under review)},
+  year    = {2026}
+}
+</code></pre>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            Website template based on <a href="https://nerfies.github.io/">Nerfies</a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
