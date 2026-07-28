@@ -126,7 +126,15 @@
                 <a href="#" target="_blank"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon"><i class="ai ai-arxiv"></i></span>
-                  <span>arXiv (coming soon)</span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- PDF -->
+              <span class="link-block">
+                <a href="#" target="_blank"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>PDF</span>
                 </a>
               </span>
               <!-- Code -->
@@ -134,7 +142,15 @@
                 <a href="https://github.com/VMarsocci/pangaea-bench" target="_blank"
                    class="external-link button is-normal is-rounded is-dark">
                   <span class="icon"><i class="fab fa-github"></i></span>
-                  <span>Code (coming soon)</span>
+                  <span>Code</span>
+                </a>
+              </span>
+              <!-- Dataset -->
+              <span class="link-block">
+                <a href="https://huggingface.co/datasets/prs-eth/AGBD" target="_blank" rel="noopener noreferrer"
+                    class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">&#129303;</span>
+                  <span>Dataset</span>
                 </a>
               </span>
             </div>
@@ -266,16 +282,27 @@
         <p class="table-caption">Table 1. Test RMSE (Mg/ha, &darr;) on the full dataset. Mean ± std over 3 runs (except GFM).
         <b>Best</b> in bold, <span class="second">second best</span> underlined.</p>
 
+        <div class="content has-text-justified" style="margin-top:1rem;">
+          <p>
+            <b>The other embedding product, TESSERA, follows the same pattern.</b> On the AGBD&nbsp;Lite screening set,
+            <code>fcn_film</code> on TESSERA (56.43&nbsp;Mg/ha) beats the supervised model on raw AGBD features (59.02) but
+            trails AEF (53.70); an MLP shows the same ordering (59.79 vs.&nbsp;53.91). Because AEF is both stronger and half the
+            storage (64 vs.&nbsp;128 values per pixel), the full-scale experiments above focus on AEF.
+          </p>
+        </div>
+
         <div class="publication-results" style="margin-top:2rem;">
           <img width="100%" src="./static/imgs/density.png" alt="Density scatter of predicted vs. GEDI reference AGB"/>
           <p class="table-caption has-text-centered">Figure 1. Density scatter of predicted vs. GEDI reference AGB for <code>fcn_film</code> trained on
-          AGBD features (left) and AEF embeddings (right). AEF improves the correlation (r: 0.844&rarr;0.862, R&sup2;: 0.712&rarr;0.742).</p>
+          AGBD features (left) and AEF embeddings (middle), and the best GFM SSL4EO-MoCo (right). AEF improves the correlation
+          (r: 0.844&rarr;0.862, R&sup2;: 0.712&rarr;0.742), while SSL4EO-MoCo trails both (r 0.798, R&sup2; 0.635).</p>
         </div>
 
         <div class="publication-results" style="margin-top:2rem;">
           <img width="100%" src="./static/imgs/binned.png" alt="Test residuals stratified by AGB bin"/>
-          <p class="table-caption has-text-centered">Figure 2. Test residuals (AGB<sub>pred</sub> &minus; AGB<sub>true</sub>) by reference AGB bin.
-          Both models underestimate high biomass (saturation), but AEF (orange) reduces the magnitude across almost all bins.</p>
+          <p class="table-caption has-text-centered">Figure 2. Test residuals (AGB<sub>pred</sub> &minus; AGB<sub>true</sub>) by reference AGB bin, for <code>fcn_film</code>
+          on AGBD features (blue), AEF embeddings (orange), and the best GFM SSL4EO-MoCo (green). All underestimate high biomass
+          (saturation), but AEF reduces the magnitude across almost all bins, while SSL4EO-MoCo underestimates the most.</p>
         </div>
       </div>
     </div>
@@ -302,12 +329,12 @@
               <tr><td class="left">SSL4EO-MoCo</td><td class="best">64.34</td></tr>
               <tr><td class="left">Prithvi-2</td><td class="second">66.43</td></tr>
               <tr><td class="left">CROMA</td><td>66.57</td></tr>
+              <tr><td class="left">TerraMind</td><td>68.33</td></tr>
               <tr><td class="left">SatlasNet</td><td>69.20</td></tr>
               <tr><td class="left">SpectralGPT</td><td>71.23</td></tr>
-              <tr><td class="left">TerraMind</td><td>74.50</td></tr>
               <tr><td class="left">DOFA</td><td>75.24</td></tr>
+              <tr><td class="left">Prithvi</td><td>76.17</td></tr>
               <tr><td class="left">RemoteCLIP</td><td>78.17</td></tr>
-              <tr><td class="left">Prithvi</td><td>78.25</td></tr>
               <tr><td class="left">GFM-Swin</td><td>78.52</td></tr>
               <tr><td class="left">ScaleMAE</td><td>87.39</td></tr>
             </tbody>
@@ -381,6 +408,57 @@
   </div>
 </section>
 
+<!-- QUALITATIVE: PREDICTION MAPS & REPRESENTATIONS -->
+<section class="section pt-0">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths" style="width:100%;">
+        <h2 class="title is-3">Prediction maps &amp; learned representations</h2>
+        <div class="content has-text-justified">
+          <p>
+            Beyond aggregate error, we produce dense wall-to-wall AGB maps on three zoomed-in Sentinel-2 tiles spanning
+            distinct biomes &mdash; Banks Peninsula (New Zealand), Tyrol (Austria) and Qinling (Shaanxi, China) &mdash; for
+            <code>fcn_film</code>&nbsp;&times;&nbsp;AEF, the supervised <code>fcn_film</code>&nbsp;&times;&nbsp;AGBD baseline, the best
+            weight-distributed GFM (SSL4EO-MoCo) and the ESA CCI product. Scored against the GEDI footprints inside each
+            window, the ranking mirrors the benchmark: <b>AEF is closest to GEDI on every tile</b>, then the AGBD-feature
+            baseline, then SSL4EO-MoCo, with ESA CCI furthest away.
+          </p>
+        </div>
+        <div class="results-table-wrap">
+          <table class="results" style="max-width:640px;">
+            <thead>
+              <tr><th class="left">Map</th><th>New Zealand</th><th>Austria</th><th>China</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">64.3</td><td class="best">75.5</td><td class="best">95.6</td></tr>
+              <tr><td class="left"><code>fcn_film</code> &times; AGBD</td><td>66.8</td><td>87.3</td><td>121.5</td></tr>
+              <tr><td class="left">SSL4EO-MoCo</td><td>72.5</td><td>103.8</td><td>137.9</td></tr>
+              <tr><td class="left">ESA CCI</td><td>90.3</td><td>117.1</td><td>175.6</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-caption">Table 5. Per-tile RMSE (Mg/ha, &darr;) of each map against the independent GEDI L4A footprints
+        in the window. <b>Best</b> per tile in bold.</p>
+
+        <div class="publication-results" style="margin-top:2rem;">
+          <img width="100%" src="./static/imgs/prediction_maps.png" alt="Predicted AGB maps across four sources on three tiles"/>
+          <p class="table-caption has-text-centered">Figure 4. Predicted AGB maps on three tiles. Rows: Sentinel-2 true colour;
+          <code>fcn_film</code>&nbsp;&times;&nbsp;AEF; <code>fcn_film</code>&nbsp;&times;&nbsp;AGBD (supervised baseline); SSL4EO-MoCo;
+          and ESA CCI v6.0. The AEF maps recover coherent biomass gradients that follow terrain, while the coarse (100&nbsp;m) ESA CCI
+          diverges most from GEDI.</p>
+        </div>
+
+        <div class="publication-results" style="margin-top:2rem;">
+          <img width="100%" src="./static/imgs/feature_activations.png" alt="PCA of learned feature activations across models"/>
+          <p class="table-caption has-text-centered">Figure 5. Penultimate-layer activations (reduced to three PCA components, shown as RGB)
+          over ~1.3&nbsp;km windows. The AEF and AGBD-feature activations resolve fine structure at 10&nbsp;m, while SSL4EO-MoCo (30&nbsp;m)
+          is blockier and less differentiated. Colour marks position in activation space; hues are not comparable across panels.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- AGBREF COMPARISON -->
 <section class="section pt-0">
   <div class="container is-max-desktop">
@@ -401,26 +479,26 @@
               <tr><th class="left">Plots</th><th class="left">Model</th><th>R&sup2;</th><th>r</th><th>RMSE</th><th>MAE</th><th>ME</th></tr>
             </thead>
             <tbody>
-              <tr><td class="left" rowspan="2">All</td><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">0.563</td><td>0.754</td><td class="best">44.74</td><td>28.26</td><td class="best">&minus;0.59</td></tr>
-              <tr><td class="left">ESA CCI</td><td>0.543</td><td class="best">0.763</td><td>45.80</td><td class="best">26.77</td><td>&minus;3.09</td></tr>
-              <tr><td class="left" rowspan="2">Subset</td><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">0.689</td><td>0.835</td><td class="best">34.71</td><td>24.34</td><td>4.95</td></tr>
-              <tr><td class="left">ESA CCI</td><td>0.687</td><td class="best">0.858</td><td>34.82</td><td class="best">21.86</td><td class="best">1.94</td></tr>
+              <tr><td class="left" rowspan="2">All</td><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">0.563</td><td>0.752</td><td class="best">44.79</td><td>28.31</td><td>&minus;1.18</td></tr>
+              <tr><td class="left">ESA CCI</td><td>0.543</td><td class="best">0.764</td><td>45.77</td><td class="best">27.20</td><td class="best">&minus;0.60</td></tr>
+              <tr><td class="left" rowspan="2">Subset</td><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">0.696</td><td>0.837</td><td class="best">34.32</td><td>24.18</td><td class="best">4.42</td></tr>
+              <tr><td class="left">ESA CCI</td><td>0.687</td><td class="best">0.862</td><td>34.83</td><td class="best">22.13</td><td>4.72</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="table-caption">Table 5. Our AGB predictions vs. ESA CCI, evaluated against AGBRef.
+        <p class="table-caption">Table 6. Our AGB predictions vs. ESA CCI, evaluated against AGBRef.
         <i>All</i>: all plots except Japan; <i>Subset</i>: plots within 1500&nbsp;km of an AGBD region.
         <b>Best</b> per column in bold.</p>
 
         <div class="publication-results" style="margin-top:2rem;">
           <img width="100%" src="./static/imgs/agbref_density.png" alt="Global distribution of AGBRef reference plots"/>
-          <p class="table-caption has-text-centered">Figure 4. Spatial distribution of the independent AGBRef reference plots used for this evaluation
+          <p class="table-caption has-text-centered">Figure 6. Spatial distribution of the independent AGBRef reference plots used for this evaluation
           (H3 hexagonal grid).</p>
         </div>
 
         <div class="publication-results" style="margin-top:2rem;">
           <img width="100%" src="./static/imgs/agbref.png" alt="Predicted vs. AGBRef AGB for our model and ESA CCI"/>
-          <p class="table-caption has-text-centered">Figure 5. Predicted vs. AGBRef reference AGB for our <code>fcn_film</code>&nbsp;&times;&nbsp;AEF model (left) and ESA CCI (right).
+          <p class="table-caption has-text-centered">Figure 7. Predicted vs. AGBRef reference AGB for our <code>fcn_film</code>&nbsp;&times;&nbsp;AEF model (left) and ESA CCI (right).
           Top: per-plot scatter; bottom: binned means with spread. Both saturate at high biomass, tracking the 1:1 line closely below ~150 t/ha.</p>
         </div>
       </div>
@@ -433,7 +511,12 @@
   <div class="container is-max-desktop content">
     <h2 class="title">Citation</h2>
     <p>If you find our work helpful, consider citing our paper 🙂</p>
-    <pre><code>coming soon...</code></pre>
+    <pre><code>@article{Sialelli2026GFMAGB,
+  title   = {Above-ground Biomass Estimation with Geospatial Foundation Models},
+  author  = {Sialelli, Ghjulia and Scheibenreif, Linus and Wegner, Jan Dirk and Schindler, Konrad},
+  journal = {Remote Sensing of Environment (under review)},
+  year    = {2026}
+}
 </code></pre>
   </div>
 </section>
