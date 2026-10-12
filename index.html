@@ -2,14 +2,14 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta name="description" content="A benchmark of Geospatial Foundation Models for global-scale above-ground biomass estimation on the AGBD dataset. We compare GFMs run as frozen encoders against pre-computed embedding products (AlphaEarth Foundations, TESSERA) and a fully supervised baseline.">
-  <meta name="keywords" content="Above-ground biomass, Geospatial Foundation Models, Remote Sensing, Embeddings, AlphaEarth, TESSERA, AGBD, PANGAEA">
+  <meta name="description" content="A benchmark of 13 Geospatial Foundation Models for global above-ground biomass estimation on AGBD, frozen and fine-tuned with LoRA, against a fully supervised baseline. GFMs trained on rich multi-modal, multi-temporal data (AlphaEarth Foundations, TESSERA) give the best results.">
+  <meta name="keywords" content="Above-ground biomass, Geospatial Foundation Models, Remote Sensing, Embeddings, AlphaEarth Foundations, TESSERA, AGBD, PANGAEA, LoRA, GEDI, ESA CCI, AGBref">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="index, follow">
-  <title>Above-ground Biomass Estimation with Geospatial Foundation Models</title>
+  <title>Multi-Modal, Multi-Temporal Geospatial Foundation Models Improve Global Above-Ground Biomass Estimation</title>
 
-  <meta property="og:title" content="Above-ground Biomass Estimation with Geospatial Foundation Models">
-  <meta property="og:description" content="A benchmark of GFMs and pre-computed embedding products for global-scale biomass estimation.">
+  <meta property="og:title" content="Multi-Modal, Multi-Temporal Geospatial Foundation Models Improve Global Above-Ground Biomass Estimation">
+  <meta property="og:description" content="A benchmark of 13 Geospatial Foundation Models for global above-ground biomass estimation on AGBD.">
   <meta property="og:type" content="article">
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
@@ -82,6 +82,15 @@
     .finding-card h3 { font-weight: 700; margin-bottom: 0.4rem; font-size: 1.02rem; }
     .finding-card p { font-size: 0.9rem; color: #444; }
     .highlight-num { color: #1D9E75; font-weight: 700; }
+    table.results .sub td.left { padding-left: 1.6rem; font-style: italic; }
+    .tables-row { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; align-items: flex-start; }
+    .tables-row > div { flex: 1 1 300px; min-width: 0; }
+    @media (max-width: 600px) {
+      table.results { font-size: 0.76rem; }
+      table.results th, table.results td { padding: 0.32rem 0.35rem; }
+      table.results .std { font-size: 0.68rem; }
+      table.results .sub td.left { padding-left: 0.9rem; }
+    }
   </style>
 </head>
 <body>
@@ -101,7 +110,7 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column has-text-centered">
-          <h1 class="title is-1 is-size-3-mobile publication-title">Above-ground Biomass Estimation with Geospatial Foundation Models</h1>
+          <h1 class="title is-1 is-size-3-mobile publication-title">Multi-Modal, Multi-Temporal Geospatial Foundation Models Improve Global Above-Ground Biomass Estimation</h1>
           <div class="is-size-5 publication-authors">
             <span class="author-block">
               <a href="https://ghjuliasialelli.github.io/">Ghjulia Sialelli</a><sup>🛰️🤖</sup>,</span>
@@ -110,7 +119,7 @@
             <span class="author-block">
               <a href="https://scholar.google.com/citations?user=sxLG1rgAAAAJ&hl=en">Jan Dirk Wegner</a><sup>🌲</sup>,</span>
             <span class="author-block">
-              <a href="https://scholar.google.ch/citations?user=FZuNgqIAAAAJ&hl=en">Konrad Schindler</a><sup>🛰️</sup></span>
+              <a href="https://scholar.google.ch/citations?user=FZuNgqIAAAAJ&hl=en">Konrad Schindler</a><sup>🛰️🤖</sup></span>
           </div>
 
           <div class="is-size-5 publication-authors footer-section">
@@ -121,9 +130,9 @@
 
           <div class="column has-text-centered">
             <div class="publication-links">
-              <!-- arXiv -->
+              <!-- Preprint -->
               <span class="link-block">
-                <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7213886" target="_blank" 
+                <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7213886" target="_blank"
                   class="external-link button is-normal is-rounded is-dark" >
                   <span class="icon"><i class="ai ai-arxiv"></i></span>
                   <span>preprint</span>
@@ -145,6 +154,14 @@
                   <span>Dataset</span>
                 </a>
               </span>
+              <!-- Cite -->
+              <span class="link-block">
+                <a href="#BibTeX"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-quote-right"></i></span>
+                  <span>Cite</span>
+                </a>
+              </span>
             </div>
           </div>
         </div>
@@ -157,12 +174,12 @@
 <section class="hero teaser">
   <div class="container is-max-desktop">
     <div class="hero-body">
-      <!-- To use the pipeline figure, drop overview.png into static/imgs/ and uncomment:
-      <img id="overview" width="100%" src="./static/imgs/overview.png" alt="Overview of the pipeline"/>
-      -->
-      <h2 class="subtitle has-text-centered">
-        For global-scale biomass regression, GFMs run as frozen encoders underperform, while
-        <b>pre-computed embedding products</b> (AlphaEarth Foundations, TESSERA) are remarkably effective.
+      <img id="overview" width="100%" src="./static/imgs/pipeline.png" alt="Biomass estimation framework: GFM encoders with a UPerNet head, pre-computed AEF and TESSERA embeddings with lighter heads, and a supervised baseline"/>
+      <p class="table-caption has-text-centered">Biomass estimation framework. <b>(a)</b> The GFM encodes the subset of AGBD features it was pre-trained on; the encoder is kept frozen or fine-tuned with LoRA, and a UPerNet head is trained on top. <b>(b)</b> The pre-computed AEF and TESSERA embeddings are fed to a UPerNet head, a linear probe (LP), an MLP, or <code>fcn_film</code>. <b>(c)</b> The supervised baseline, <code>fcn_film</code>, is trained on all AGBD features without a pre-trained encoder.</p>
+      <h2 class="subtitle has-text-centered" style="margin-top:1.2rem;">
+        Of 13 Geospatial Foundation Models, only the two trained on <b>rich multi-modal, multi-temporal data</b>
+        (AlphaEarth Foundations and TESSERA) beat a fully supervised state-of-the-art model, and the AEF-based model performs on par
+        with the ESA CCI biomass product on independent reference data.
       </h2>
     </div>
   </div>
@@ -176,23 +193,24 @@
         <h2 class="title is-3 is-spaced">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Accurate estimation of Above-Ground Biomass (AGB) from satellite imagery is essential for wide-area
-            monitoring of carbon stocks, yet it remains a challenging regression task at global scale.
-            Geospatial Foundation Models (GFMs) have recently emerged as a promising machine learning paradigm to
-            derive general-purpose representations from Earth observation data, but their utility for quantitative
-            regression tasks like biomass estimation remains largely unexplored, as most benchmarks emphasize
-            classification and segmentation. Here, we present a comprehensive benchmark of GFMs for global-scale AGB
-            estimation using the AGBD dataset. We distinguish two ways in which GFMs reach practitioners: models
-            distributed as <b>weights</b> to be run by the user, which we evaluate as frozen encoders within the
-            PANGAEA framework, and models distributed as ready-to-use <b>pre-computed embedding products</b>, for which
-            we evaluate AlphaEarth Foundations (AEF) and TESSERA. We compare 11 GFMs and both embedding products against
-            a fully supervised state-of-the-art (SOTA) model, and assess geographical and temporal generalization as
-            well as agreement with the ESA CCI biomass product on independent reference data. Our results show that this
-            distinction, rather than the frozen-versus-fine-tuned axis, is what matters: GFMs run as frozen encoders
-            substantially underperform the supervised SOTA model, whereas pre-computed embedding products prove highly
-            effective. An MLP trained on AEF embeddings outperforms the supervised SOTA model trained on AGBD features,
-            and the same SOTA model trained on AEF embeddings achieves the best overall result, while also generalizing
-            better across space and time.
+            Accurate estimation of above-ground biomass (AGB) from satellite imagery is essential for the large-scale
+            monitoring of carbon stocks, yet it remains a challenging regression task at global scale. Geospatial Foundation
+            Models (GFMs) have recently emerged as a promising machine learning paradigm to derive general-purpose
+            representations from Earth observation (EO) data, but their utility for quantitative regression tasks like biomass
+            estimation remains largely unexplored, as most benchmarks focus on classification and segmentation. Here, we
+            benchmark 13 GFMs for above-ground biomass estimation, specifically GEDI L4A biomass values. We compare them against
+            a fully supervised state-of-the-art (SOTA) baseline trained on A Global-scale Biomass Dataset (AGBD), a machine
+            learning-ready benchmark spanning diverse biomes and geographies. Most of the GFMs evaluated substantially
+            underperform with respect to the supervised baseline, whether frozen or fine-tuned; only TESSERA and AlphaEarth
+            Foundations (AEF) features with certain prediction heads yield a better performance. Overall, our SOTA model trained
+            on AEF embeddings and selected raw EO features achieves the best overall result (an RMSE of 50.79&nbsp;Mg/ha vs.
+            53.73&nbsp;Mg/ha on AGBD features). This feature combination also generalizes better than AGBD features: it reduces
+            RMSE by up to 25% in selected regions excluded from training, and, trained on single-year data alone, it outperforms
+            the model trained on multi-year AGBD features. With labels from only 11 regions around the world, the AEF-based
+            model also performs on par with the globally calibrated ESA CCI biomass product on independent reference plots
+            (RMSE 44.79&nbsp;Mg/ha vs. 45.77&nbsp;Mg/ha). These findings indicate that GFM features can be highly informative
+            for biomass estimation, when the underlying model is trained on rich multi-modal data. Distributed as accessible
+            embedding layers, they lower the computational barrier to state-of-the-art biomass estimation for practitioners.
           </p>
         </div>
       </div>
@@ -206,29 +224,38 @@
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths" style="width:100%;">
         <h2 class="title is-3">Key findings</h2>
-        <div class="columns key-findings">
-          <div class="column">
-            <div class="finding-card">
-              <div class="icon-top">🧊</div>
-              <h3>Frozen GFMs underperform</h3>
-              <p>Every GFM evaluated as a frozen encoder in PANGAEA lags behind the fully supervised baseline. The best,
-              SSL4EO-MoCo (<span class="highlight-num">60.56</span> Mg/ha), is beaten even by a simple MLP on AEF embeddings.</p>
-            </div>
-          </div>
-          <div class="column">
+        <div class="columns is-multiline key-findings">
+          <div class="column is-half">
             <div class="finding-card">
               <div class="icon-top">🛰️</div>
-              <h3>Embedding products win</h3>
-              <p><code>fcn_film</code> on AEF<sup>+</sup> gives the best result (<span class="highlight-num">50.79</span> Mg/ha),
-              and even an MLP on AEF (52.22) beats the supervised model on raw AGBD features (53.73).</p>
+              <h3>Rich inputs make the difference</h3>
+              <p>Only AEF and TESSERA, which summarize a full year of multi-modal observations per pixel, beat the supervised
+              baseline on AGBD Lite (<span class="highlight-num">53.70</span> and <span class="highlight-num">56.43</span> vs. 59.02&nbsp;Mg/ha).
+              The other 11 GFMs fall short, frozen or fine-tuned with LoRA: the best, CROMA (+SAR), reaches 61.56&nbsp;Mg/ha.</p>
             </div>
           </div>
-          <div class="column">
+          <div class="column is-half">
+            <div class="finding-card">
+              <div class="icon-top">🏆</div>
+              <h3>Best result on AGBD Full</h3>
+              <p><code>fcn_film</code> on AEF<sup>+</sup> reaches <span class="highlight-num">50.79</span>&nbsp;Mg/ha vs. 53.73 on AGBD features.
+              Even an MLP on AEF (52.22) beats the supervised baseline and the fine-tuned TerraMind (+SAR) model (57.21).</p>
+            </div>
+          </div>
+          <div class="column is-half">
             <div class="finding-card">
               <div class="icon-top">🌍</div>
+              <h3>Better generalization</h3>
+              <p>AEF-based models reduce RMSE by up to <span class="highlight-num">25%</span> in regions held out from training, and,
+              trained on 2019 data alone, they beat AGBD features trained on both years.</p>
+            </div>
+          </div>
+          <div class="column is-half">
+            <div class="finding-card">
+              <div class="icon-top">📏</div>
               <h3>On par with ESA CCI</h3>
-              <p>Trained on just 11 regions, our AEF model reaches near-parity with the globally-calibrated ESA CCI
-              product on independent AGBRef data, with stronger spatial and temporal generalization.</p>
+              <p>With labels from only 11 regions, the AEF-based model matches the globally calibrated ESA CCI product on
+              independent AGBref plots (RMSE <span class="highlight-num">44.79</span> vs. 45.77&nbsp;Mg/ha).</p>
             </div>
           </div>
         </div>
@@ -237,107 +264,150 @@
   </div>
 </section>
 
-<!-- MAIN RESULTS -->
+<!-- AGBD LITE BENCHMARK -->
 <section class="section pt-0">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths" style="width:100%;">
-        <h2 class="title is-3">Main benchmark results</h2>
+        <h2 class="title is-3">Benchmark of 13 GFMs</h2>
         <div class="content has-text-justified">
           <p>
-            Test RMSE on the full AGBD dataset. All models are trained end-to-end on the full dataset, except the GFM,
-            for which only the decoder head is trained. <b>Pre-computed embeddings are the most informative input</b>:
-            training the supervised <code>fcn_film</code> model on AEF instead of raw AGBD features lowers error from
-            53.73 to 50.92 Mg/ha, and augmenting AEF with a few ancillary layers (AEF<sup>+</sup>) is best overall.
+            We first compare all 13 GFMs on AGBD Lite (&approx;600k samples), each with a UPerNet head, against the supervised
+            <code>fcn_film</code> baseline. <b>AEF and TESSERA are the only GFMs that beat the baseline trained on all AGBD
+            features</b> (53.70 and 56.43 vs. 59.02&nbsp;Mg/ha). With all encoders frozen, they have 17&ndash;39% and 11&ndash;35%
+            lower RMSE than the other 11 GFMs; of those, only SSL4EO-MoCo (64.34&nbsp;Mg/ha) improves on the Sentinel-2-only
+            baseline (66.51&nbsp;Mg/ha).
+          </p>
+          <p>
+            Fine-tuning with LoRA improves every encoder, most of all those whose frozen features performed worst, and 6 of the 11
+            then beat the Sentinel-2-only baseline. Adding L-band SAR (CROMA, TerraMind, DOFA) or multi-temporal Sentinel-2
+            (SatlasNet, Prithvi, Prithvi v2) helps further, but less than fine-tuning itself. The best fine-tuned configuration,
+            CROMA (+SAR) at 61.56&nbsp;Mg/ha, still trails AEF, TESSERA and the multi-modal supervised baseline.
+          </p>
+        </div>
+
+        <div class="publication-results">
+          <img width="100%" src="./static/imgs/fig_benchmark.png" alt="Test RMSE of all GFMs and baselines on AGBD Lite and AGBD Full"/>
+          <p class="table-caption has-text-centered">Figure 1. Test RMSE (Mg/ha, inverted axis). Blue lines mark the supervised
+          <code>fcn_film</code> baseline trained on all AGBD features (solid) or on Sentinel-2 only (dashed); the shaded area marks
+          results better than the baseline on all AGBD features. (a) AGBD Lite: GFMs with a UPerNet head on a frozen or LoRA-adapted
+          encoder, optionally with L-band SAR (+) or multi-temporal Sentinel-2 (&times;) input; AEF and TESSERA are also shown with a
+          linear probe (&#9651;), an MLP (&#9633;) and <code>fcn_film</code> (&#9671;). (b) AGBD Full: AEF and AEF<sup>+</sup>
+          (AEF plus land cover, slope, aspect and encoded coordinates) with various heads, and TerraMind (+SAR, LoRA, UPerNet head).</p>
+        </div>
+
+        <div class="tables-row" style="margin-top:2rem;">
+          <div class="results-table-wrap">
+            <table class="results">
+              <thead>
+                <tr><th class="left">GFM</th><th>frozen</th><th>LoRA</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="left">AEF</td><td class="best">53.71</td><td>&mdash;</td></tr>
+                <tr><td class="left">TESSERA</td><td class="second">57.12</td><td>&mdash;</td></tr>
+                <tr><td class="left">SSL4EO-MoCo</td><td>64.34</td><td>63.05</td></tr>
+                <tr><td class="left">Prithvi</td><td>76.17</td><td>70.91</td></tr>
+                <tr class="sub"><td class="left">+MT</td><td>&mdash;</td><td>71.98</td></tr>
+                <tr><td class="left">Prithvi v2</td><td>66.43</td><td>64.89</td></tr>
+                <tr class="sub"><td class="left">+MT</td><td>&mdash;</td><td>64.08</td></tr>
+                <tr><td class="left">CROMA</td><td>66.57</td><td>62.83</td></tr>
+                <tr class="sub"><td class="left">+SAR</td><td>&mdash;</td><td class="best">61.56</td></tr>
+                <tr><td class="left">TerraMind</td><td>68.33</td><td>64.66</td></tr>
+                <tr class="sub"><td class="left">+SAR</td><td>&mdash;</td><td>62.45</td></tr>
+                <tr><td class="left">SatlasNet</td><td>69.20</td><td>64.96</td></tr>
+                <tr class="sub"><td class="left">+MT</td><td>&mdash;</td><td class="second">62.14</td></tr>
+                <tr><td class="left">SpectralGPT</td><td>71.23</td><td>65.77</td></tr>
+                <tr><td class="left">DOFA</td><td>75.24</td><td>66.57</td></tr>
+                <tr class="sub"><td class="left">+SAR</td><td>&mdash;</td><td>65.58</td></tr>
+                <tr><td class="left">RemoteCLIP</td><td>78.17</td><td>74.91</td></tr>
+                <tr><td class="left">GFM-Swin</td><td>78.52</td><td>69.17</td></tr>
+                <tr><td class="left">ScaleMAE</td><td>87.39</td><td>76.85</td></tr>
+              </tbody>
+            </table>
+            <p class="table-caption">Table 1. Test RMSE (Mg/ha, &darr;) on AGBD Lite, UPerNet head on a frozen or LoRA-adapted encoder.
+            +SAR: with L-band ALOS PALSAR-2 input; +MT: with three Sentinel-2 dates. AEF and TESSERA are pre-computed embeddings,
+            so only the head is trained. <b>Best</b> per column in bold, <span class="second">second best</span> underlined.</p>
+          </div>
+          <div class="results-table-wrap">
+            <table class="results">
+              <thead>
+                <tr><th class="left">Features</th><th>LP</th><th>MLP</th><th><code>fcn_film</code></th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="left">S2</td><td>&mdash;</td><td>&mdash;</td><td>66.51 <span class="std">± 0.04</span></td></tr>
+                <tr><td class="left">AGBD</td><td>&mdash;</td><td>&mdash;</td><td>59.02 <span class="std">± 0.05</span></td></tr>
+                <tr><td class="left">AEF</td><td>57.34 <span class="std">± 0.01</span></td><td class="second">53.91 <span class="std">± 0.02</span></td><td class="best">53.70 <span class="std">± 0.04</span></td></tr>
+                <tr><td class="left">TESSERA</td><td>66.86 <span class="std">± 0.06</span></td><td>59.79 <span class="std">± 0.09</span></td><td>56.43 <span class="std">± 0.02</span></td></tr>
+              </tbody>
+            </table>
+            <p class="table-caption">Table 2. Test RMSE (Mg/ha, &darr;) on AGBD Lite with lighter heads: linear probe (LP), MLP and
+            <code>fcn_film</code>, on Sentinel-2 bands only (S2), all AGBD features, or AEF and TESSERA embeddings. Mean ± std over
+            three runs. <b>Best</b> in bold, <span class="second">second best</span> underlined.</p>
+            <div class="content has-text-justified" style="margin-top:1rem;">
+              <p>
+                With a per-pixel MLP, AEF reaches 53.91&nbsp;Mg/ha, and even a linear probe on AEF (57.34) beats the supervised
+                baseline. TESSERA depends more on the head: it encodes each pixel's time series independently, so it only beats
+                the baseline with heads that add spatial context.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="publication-results" style="margin-top:2rem;">
+          <img width="85%" src="./static/imgs/fig_cost.png" alt="Fine-tuning cost against test RMSE for the LoRA-adapted GFMs"/>
+          <p class="table-caption has-text-centered">Figure 2. GPU-hours until the best checkpoint (log scale, NVIDIA GeForce RTX 4090)
+          against test RMSE (inverted axis) for each GFM fine-tuned with LoRA and a UPerNet head on AGBD Lite; +SAR denotes added
+          L-band SAR input. Marker area is proportional to the number of encoder parameters. TerraMind (+SAR) comes within
+          1&nbsp;Mg/ha of CROMA (+SAR) in 2.5 GPU-hours instead of roughly 32.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AGBD FULL -->
+<section class="section pt-0">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths" style="width:100%;">
+        <h2 class="title is-3">Results on AGBD Full</h2>
+        <div class="content has-text-justified">
+          <p>
+            On AGBD Full (&approx;16M samples), <b>AEF keeps its lead</b>. An MLP on AEF already beats the supervised baseline,
+            <code>fcn_film</code> on AEF lowers the error to 50.92&nbsp;Mg/ha, and adding a few ancillary features (AEF<sup>+</sup>)
+            gives the best result overall. TerraMind (+SAR), chosen because it nearly matches CROMA (+SAR) at about a tenth of the
+            compute, still trails AEF when trained on the full dataset.
           </p>
         </div>
         <div class="results-table-wrap">
-          <table class="results">
+          <table class="results" style="max-width:560px;">
             <thead>
               <tr><th class="left">Model</th><th>Features</th><th>RMSE (&darr;)</th></tr>
             </thead>
             <tbody>
-              <tr class="grouphead"><td colspan="3">Baseline (fully supervised)</td></tr>
+              <tr class="grouphead"><td colspan="3">Supervised baseline</td></tr>
+              <tr><td class="left"><code>fcn_film</code></td><td>S2</td><td>58.57 <span class="std">± 0.03</span></td></tr>
               <tr><td class="left"><code>fcn_film</code></td><td>AGBD</td><td>53.73 <span class="std">± 0.02</span></td></tr>
-              <tr><td class="left"><code>fcn_film</code></td><td>S2 only</td><td>58.57 <span class="std">± 0.03</span></td></tr>
-              <tr class="grouphead"><td colspan="3">Embeddings</td></tr>
-              <tr><td class="left">Linear Probe</td><td>AEF</td><td>60.46 <span class="std">± 0.17</span></td></tr>
+              <tr class="grouphead"><td colspan="3">GFMs</td></tr>
+              <tr><td class="left">LP</td><td>AEF</td><td>56.67 <span class="std">± 0.01</span></td></tr>
               <tr><td class="left">MLP</td><td>AEF</td><td>52.22 <span class="std">± 0.02</span></td></tr>
               <tr><td class="left"><code>fcn_film</code></td><td>AEF</td><td class="second">50.92 <span class="std">± 0.02</span></td></tr>
               <tr><td class="left"><code>fcn_film</code></td><td>AEF<sup>+</sup></td><td class="best">50.79 <span class="std">± 0.01</span></td></tr>
-              <tr class="grouphead"><td colspan="3">GFM (best)</td></tr>
-              <tr><td class="left">SSL4EO-MoCo</td><td>S2 only</td><td>60.56</td></tr>
+              <tr><td class="left">TerraMind (LoRA, UPerNet)</td><td>S2 + SAR</td><td>57.21</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="table-caption">Table 1. Test RMSE (Mg/ha, &darr;) on the full dataset. Mean ± std over 3 runs (except GFM).
-        <b>Best</b> in bold, <span class="second">second best</span> underlined.</p>
-
-        <div class="content has-text-justified" style="margin-top:1rem;">
-          <p>
-            <b>The other embedding product, TESSERA, follows the same pattern.</b> On the AGBD&nbsp;Lite screening set,
-            <code>fcn_film</code> on TESSERA (56.43&nbsp;Mg/ha) beats the supervised model on raw AGBD features (59.02) but
-            trails AEF (53.70); an MLP shows the same ordering (59.79 vs.&nbsp;53.91). Because AEF is both stronger and half the
-            storage (64 vs.&nbsp;128 values per pixel), the full-scale experiments above focus on AEF.
-          </p>
-        </div>
-
-        <div class="publication-results" style="margin-top:2rem;">
-          <img width="100%" src="./static/imgs/density.png" alt="Density scatter of predicted vs. GEDI reference AGB"/>
-          <p class="table-caption has-text-centered">Figure 1. Density scatter of predicted vs. GEDI reference AGB for <code>fcn_film</code> trained on
-          AGBD features (left) and AEF embeddings (middle), and the best GFM SSL4EO-MoCo (right). AEF improves the correlation
-          (r: 0.844&rarr;0.862, R&sup2;: 0.712&rarr;0.742), while SSL4EO-MoCo trails both (r 0.798, R&sup2; 0.635).</p>
-        </div>
-
-        <div class="publication-results" style="margin-top:2rem;">
-          <img width="100%" src="./static/imgs/binned.png" alt="Test residuals stratified by AGB bin"/>
-          <p class="table-caption has-text-centered">Figure 2. Test residuals (AGB<sub>pred</sub> &minus; AGB<sub>true</sub>) by reference AGB bin, for <code>fcn_film</code>
-          on AGBD features (blue), AEF embeddings (orange), and the best GFM SSL4EO-MoCo (green). All underestimate high biomass
-          (saturation), but AEF reduces the magnitude across almost all bins, while SSL4EO-MoCo underestimates the most.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- GFM BENCHMARK -->
-<section class="section pt-0">
-  <div class="container is-max-desktop">
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-four-fifths" style="width:100%;">
-        <h2 class="title is-3">GFM leaderboard</h2>
-        <div class="content has-text-justified">
-          <p>
-            All 11 Sentinel-2-compatible GFMs in PANGAEA, evaluated with frozen encoders and a trained UPerNet decoder
-            on AGBD&nbsp;Lite. Even the strongest GFM stays well above the embedding-based models in the table above,
-            underscoring that off-the-shelf frozen features are not yet competitive for this regression task.
-          </p>
-        </div>
-        <div class="results-table-wrap">
-          <table class="results" style="max-width:460px;">
-            <thead><tr><th class="left">Model</th><th>Lite RMSE (&darr;)</th></tr></thead>
-            <tbody>
-              <tr><td class="left">SSL4EO-MoCo</td><td class="best">64.34</td></tr>
-              <tr><td class="left">Prithvi-2</td><td class="second">66.43</td></tr>
-              <tr><td class="left">CROMA</td><td>66.57</td></tr>
-              <tr><td class="left">TerraMind</td><td>68.33</td></tr>
-              <tr><td class="left">SatlasNet</td><td>69.20</td></tr>
-              <tr><td class="left">SpectralGPT</td><td>71.23</td></tr>
-              <tr><td class="left">DOFA</td><td>75.24</td></tr>
-              <tr><td class="left">Prithvi</td><td>76.17</td></tr>
-              <tr><td class="left">RemoteCLIP</td><td>78.17</td></tr>
-              <tr><td class="left">GFM-Swin</td><td>78.52</td></tr>
-              <tr><td class="left">ScaleMAE</td><td>87.39</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="table-caption">Table 2. AGBD Lite test RMSE (Mg/ha, &darr;), Sentinel-2 only, sorted by RMSE.
+        <p class="table-caption">Table 3. Test RMSE (Mg/ha, &darr;) on AGBD Full. AEF<sup>+</sup>: AEF plus land cover, slope,
+        aspect and encoded coordinates. Mean ± std over three runs, except TerraMind (single run).
         <b>Best</b> in bold, <span class="second">second best</span> underlined.</p>
 
         <div class="publication-results" style="margin-top:2rem;">
-          <img width="100%" src="./static/imgs/throughput.png" alt="RMSE vs. inference throughput for all GFMs"/>
-          <p class="table-caption has-text-centered">Figure 3. Accuracy/efficiency trade-off: AGBD Lite RMSE vs. inference throughput,
-          colored by GPU-hours needed to fine-tune. The fully supervised model matches or beats every GFM at a fraction of the compute.</p>
+          <img width="100%" src="./static/imgs/binned.png" alt="Test residuals by reference AGB bin on AGBD Full"/>
+          <p class="table-caption has-text-centered">Figure 3. Test residuals (predicted &minus; reference AGB, Mg/ha) on AGBD Full,
+          for <code>fcn_film</code> on AGBD features (purple) and on AEF embeddings (green), and TerraMind (+SAR) (LoRA, UPerNet head;
+          light blue). Left: residuals per 50&nbsp;Mg/ha bin of reference AGB (boxes: median and interquartile range; whiskers:
+          1.5&times;IQR; outliers not shown); the legend gives each model's overall RMSE and R&sup2;. Right: number of test samples
+          per bin. Beyond 200&nbsp;Mg/ha all models increasingly underestimate biomass, AEF the least.</p>
         </div>
       </div>
     </div>
@@ -352,10 +422,10 @@
         <h2 class="title is-3">Geographical &amp; temporal generalization</h2>
         <div class="content has-text-justified">
           <p>
-            AEF embeddings do not just improve average accuracy &mdash; they generalize better. Under
-            <i>cross-region</i> zero-shot transfer, AEF<sup>+</sup> cuts RMSE by 17&ndash;25% in Africa and South America.
-            Where the plain AEF encoder fails on out-of-distribution South Asia, AEF<sup>+</sup> (which keeps a few raw
-            features) recovers robustness.
+            AEF embeddings do not just improve average accuracy; they also change how models behave when training and test data
+            differ. When the target region is excluded from training (<i>cross-region</i>), AEF and AEF<sup>+</sup> reduce RMSE by
+            14&ndash;25% in Africa and South America. This transfer is not unconditional: in South Asia, AEF alone is 25% worse than
+            raw AGBD features, while AEF<sup>+</sup> stays on par with them.
           </p>
         </div>
         <div class="results-table-wrap">
@@ -376,11 +446,28 @@
             </tbody>
           </table>
         </div>
-        <p class="table-caption">Table 3. Geographical generalization, test RMSE (Mg/ha, &darr;).
-        <b>cross-region</b>: trained without the target region; <b>within-region</b>: trained only on it;
-        <b>general</b>: trained on all regions. <b>Best</b> bold, <span class="second">second</span> underlined.</p>
+        <p class="table-caption">Table 4. Geographical generalization: test RMSE (Mg/ha, &darr;) of <code>fcn_film</code> trained on
+        AGBD Full with AGBD features, AEF or AEF<sup>+</sup>, evaluated on the target region. <b>cross-region</b>: trained without the
+        target region; <b>within-region</b>: trained only on it; <b>general</b>: trained on all regions. Best per region and protocol
+        in <b>bold</b>, second <span class="second">underlined</span>.</p>
 
-        <div class="results-table-wrap" style="margin-top:2rem;">
+        <div class="publication-results" style="margin-top:2rem;">
+          <img width="100%" src="./static/imgs/south_asia_binned.png" alt="Cross-region test RMSE by AGB bin for three regions"/>
+          <p class="table-caption has-text-centered">Figure 4. Test RMSE by AGB bin under the cross-region protocol, for
+          <code>fcn_film</code> on AGBD features (purple), AEF (green) and AEF<sup>+</sup> (light blue). Each column is one target
+          region, scored by a model trained without any data from that region. Top: RMSE per 50&nbsp;Mg/ha bin of reference AGB
+          (legend: overall RMSE). Bottom: share of the region's test footprints per bin. In South Asia, AEF's deficit is confined to
+          high biomass.</p>
+        </div>
+
+        <div class="content has-text-justified" style="margin-top:2rem;">
+          <p>
+            Over time, AEF and AEF<sup>+</sup> are more stable than raw spectral features: with a one-year gap between training and
+            test data, AGBD features degrade sharply, while models trained on 2019 AEF embeddings alone still beat AGBD features
+            trained on both years.
+          </p>
+        </div>
+        <div class="results-table-wrap">
           <table class="results" style="max-width:560px;">
             <thead>
               <tr><th class="left">Features</th><th>all years</th><th>cross-year</th><th>within-year</th></tr>
@@ -392,58 +479,53 @@
             </tbody>
           </table>
         </div>
-        <p class="table-caption">Table 4. Temporal generalization, test RMSE (Mg/ha, &darr;) on 2020 data.
-        AEF/AEF<sup>+</sup> trained on 2019 alone (<i>cross-year</i>) still beat AGBD trained on both years.</p>
+        <p class="table-caption">Table 5. Temporal generalization: test RMSE (Mg/ha, &darr;) on the 2020 AGBD test samples for
+        <code>fcn_film</code> trained on all years (2019 and 2020), cross-year (2019 only) or within-year (2020 only).
+        Best per column in <b>bold</b>, second <span class="second">underlined</span>.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- QUALITATIVE: PREDICTION MAPS & REPRESENTATIONS -->
+<!-- QUALITATIVE: PREDICTION MAPS -->
 <section class="section pt-0">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths" style="width:100%;">
-        <h2 class="title is-3">Prediction maps &amp; learned representations</h2>
+        <h2 class="title is-3">Prediction maps</h2>
         <div class="content has-text-justified">
           <p>
-            Beyond aggregate error, we produce dense wall-to-wall AGB maps on three zoomed-in Sentinel-2 tiles spanning
-            distinct biomes &mdash; Banks Peninsula (New Zealand), Tyrol (Austria) and Qinling (Shaanxi, China) &mdash; for
-            <code>fcn_film</code>&nbsp;&times;&nbsp;AEF, the supervised <code>fcn_film</code>&nbsp;&times;&nbsp;AGBD baseline, the best
-            weight-distributed GFM (SSL4EO-MoCo) and the ESA CCI product. Scored against the GEDI footprints inside each
-            window, the ranking mirrors the benchmark: <b>AEF is closest to GEDI on every tile</b>, then the AGBD-feature
-            baseline, then SSL4EO-MoCo, with ESA CCI furthest away.
+            We generate wall-to-wall AGB maps on zoomed-in windows of six Sentinel-2 tiles spanning distinct biomes and
+            hemispheres, with <code>fcn_film</code> on AEF embeddings and on AGBD features, and compare them with the ESA CCI v6.0
+            product. Scored against the GEDI L4A footprints inside each window, <b>the AEF-based model has the lowest error on all
+            six tiles</b>. Its maps follow terrain and vegetation structure while staying smooth over homogeneous cover; the
+            AGBD-features baseline shows the same large-scale patterns with more small-scale noise, and the coarser ESA CCI
+            (100&nbsp;m) diverges most from GEDI.
           </p>
         </div>
         <div class="results-table-wrap">
-          <table class="results" style="max-width:640px;">
+          <table class="results">
             <thead>
-              <tr><th class="left">Map</th><th>New Zealand</th><th>Austria</th><th>China</th></tr>
+              <tr><th class="left">Map</th><th>N. America</th><th>S. America</th><th>Europe</th><th>Africa</th><th>Asia</th><th>Australasia</th></tr>
             </thead>
             <tbody>
-              <tr><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">64.3</td><td class="best">75.5</td><td class="best">95.6</td></tr>
-              <tr><td class="left"><code>fcn_film</code> &times; AGBD</td><td>66.8</td><td>87.3</td><td>121.5</td></tr>
-              <tr><td class="left">SSL4EO-MoCo</td><td>72.5</td><td>103.8</td><td>137.9</td></tr>
-              <tr><td class="left">ESA CCI</td><td>90.3</td><td>117.1</td><td>175.6</td></tr>
+              <tr><td class="left"><code>fcn_film</code> on AEF</td><td class="best">102</td><td class="best">104</td><td class="best">76</td><td class="best">38</td><td class="best">96</td><td class="best">64</td></tr>
+              <tr><td class="left"><code>fcn_film</code> on AGBD features</td><td>110</td><td>111</td><td>87</td><td>45</td><td>121</td><td>67</td></tr>
+              <tr><td class="left">ESA CCI v6.0</td><td>149</td><td>159</td><td>117</td><td>53</td><td>176</td><td>90</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="table-caption">Table 5. Per-tile RMSE (Mg/ha, &darr;) of each map against the independent GEDI L4A footprints
-        in the window. <b>Best</b> per tile in bold.</p>
+        <p class="table-caption">Table 6. RMSE (Mg/ha, &darr;) of each map against the GEDI L4A footprints inside the window.
+        Tiles: 10TDL (Six Rivers National Forest, USA), 21NZD (Maripasoula, French Guiana), 32TPT (Tyrol, Austria),
+        37LCL (Selous Game Reserve, Tanzania), 49SBT (Qinling, China), 59GPM (Banks Peninsula, New Zealand).
+        <b>Best</b> per tile in bold.</p>
 
         <div class="publication-results" style="margin-top:2rem;">
-          <img width="100%" src="./static/imgs/prediction_maps.png" alt="Predicted AGB maps across four sources on three tiles"/>
-          <p class="table-caption has-text-centered">Figure 4. Predicted AGB maps on three tiles. Rows: Sentinel-2 true colour;
-          <code>fcn_film</code>&nbsp;&times;&nbsp;AEF; <code>fcn_film</code>&nbsp;&times;&nbsp;AGBD (supervised baseline); SSL4EO-MoCo;
-          and ESA CCI v6.0. The AEF maps recover coherent biomass gradients that follow terrain, while the coarse (100&nbsp;m) ESA CCI
-          diverges most from GEDI.</p>
-        </div>
-
-        <div class="publication-results" style="margin-top:2rem;">
-          <img width="100%" src="./static/imgs/feature_activations.png" alt="PCA of learned feature activations across models"/>
-          <p class="table-caption has-text-centered">Figure 5. Penultimate-layer activations (reduced to three PCA components, shown as RGB)
-          over ~1.3&nbsp;km windows. The AEF and AGBD-feature activations resolve fine structure at 10&nbsp;m, while SSL4EO-MoCo (30&nbsp;m)
-          is blockier and less differentiated. Colour marks position in activation space; hues are not comparable across panels.</p>
+          <img width="100%" src="./static/imgs/prediction_maps.jpg" alt="Predicted AGB maps from three sources on six tiles"/>
+          <p class="table-caption has-text-centered">Figure 5. Predicted AGB maps on six windows (rows). Columns: Sentinel-2
+          true-color composite; GEDI L4A footprints; <code>fcn_film</code> on AEF embeddings; <code>fcn_film</code> on AGBD features
+          (supervised baseline); ESA CCI v6.0 (100&nbsp;m); residuals (predicted &minus; GEDI, Mg/ha) per GEDI AGB bin. RMSE in each
+          panel is computed against the GEDI footprints in the window. Color scale: AGB (Mg/ha).</p>
         </div>
       </div>
     </div>
@@ -458,10 +540,11 @@
         <h2 class="title is-3">Comparison with ESA CCI on independent data</h2>
         <div class="content has-text-justified">
           <p>
-            Evaluated against the independent AGBRef reference dataset (aggregated to 10&nbsp;km), our <code>fcn_film</code>&nbsp;&times;&nbsp;AEF
-            model reaches near-parity with the globally-calibrated ESA CCI biomass product &mdash; despite being trained on
-            only the 11 AGBD regions. In the like-for-like <i>Subset</i> comparison the two are essentially tied on
-            R&sup2; and RMSE, while our model shows lower bias.
+            To test performance beyond the AGBD test set, we evaluate our <code>fcn_film</code> model on AEF and the operational
+            ESA CCI biomass map on AGBref, an independent global reference dataset built from national forest inventories, research
+            plots and airborne LiDAR, at 10&nbsp;km resolution. Although our model is trained on only the 11 AGBD regions, it
+            <b>performs on par with the globally calibrated ESA CCI product</b> in R&sup2;, r and RMSE. ESA CCI has a slightly lower
+            MAE, and the two trade places on bias, which remains small for both.
           </p>
         </div>
         <div class="results-table-wrap">
@@ -470,27 +553,56 @@
               <tr><th class="left">Plots</th><th class="left">Model</th><th>R&sup2;</th><th>r</th><th>RMSE</th><th>MAE</th><th>ME</th></tr>
             </thead>
             <tbody>
-              <tr><td class="left" rowspan="2">All</td><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">0.563</td><td>0.752</td><td class="best">44.79</td><td>28.31</td><td>&minus;1.18</td></tr>
-              <tr><td class="left">ESA CCI</td><td>0.543</td><td class="best">0.764</td><td>45.77</td><td class="best">27.20</td><td class="best">&minus;0.60</td></tr>
-              <tr><td class="left" rowspan="2">Subset</td><td class="left"><code>fcn_film</code> &times; AEF</td><td class="best">0.696</td><td>0.837</td><td class="best">34.32</td><td>24.18</td><td class="best">4.42</td></tr>
-              <tr><td class="left">ESA CCI</td><td>0.687</td><td class="best">0.862</td><td>34.83</td><td class="best">22.13</td><td>4.72</td></tr>
+              <tr><td class="left" rowspan="2">All</td><td class="left"><code>fcn_film</code> on AEF</td><td class="best">0.563</td><td>0.752</td><td class="best">44.79</td><td>28.31</td><td>&minus;1.18</td></tr>
+              <tr><td class="left">ESA CCI v6.0</td><td>0.543</td><td class="best">0.764</td><td>45.77</td><td class="best">27.20</td><td class="best">&minus;0.60</td></tr>
+              <tr><td class="left" rowspan="2">Subset</td><td class="left"><code>fcn_film</code> on AEF</td><td class="best">0.696</td><td>0.837</td><td class="best">34.32</td><td>24.18</td><td class="best">4.42</td></tr>
+              <tr><td class="left">ESA CCI v6.0</td><td>0.687</td><td class="best">0.862</td><td>34.83</td><td class="best">22.13</td><td>4.72</td></tr>
             </tbody>
           </table>
         </div>
-        <p class="table-caption">Table 6. Our AGB predictions vs. ESA CCI, evaluated against AGBRef.
-        <i>All</i>: all plots except Japan; <i>Subset</i>: plots within 1500&nbsp;km of an AGBD region.
+        <p class="table-caption">Table 7. Evaluation against AGBref reference plots, after aggregating both maps to AGBref's 10&nbsp;km
+        cells. <i>All</i>: all plots except Japan; <i>Subset</i>: plots within 1500&nbsp;km of an AGBD sample. R&sup2;: coefficient of
+        determination; r: Pearson correlation; RMSE, MAE and ME (mean error, predicted &minus; reference) in Mg/ha.
         <b>Best</b> per column in bold.</p>
 
         <div class="publication-results" style="margin-top:2rem;">
-          <img width="100%" src="./static/imgs/agbref_density.png" alt="Global distribution of AGBRef reference plots"/>
-          <p class="table-caption has-text-centered">Figure 6. Spatial distribution of the independent AGBRef reference plots used for this evaluation
-          (H3 hexagonal grid).</p>
+          <img width="100%" src="./static/imgs/AGBref_density_h3.png" alt="Global distribution of the AGBref reference plots"/>
+          <p class="table-caption has-text-centered">Figure 6. Spatial distribution of the AGBref plots used for independent validation
+          (Robinson projection, H3 hexagonal grid with &approx;86&nbsp;km&sup2; per cell). Color: number of plots per cell (log scale).</p>
         </div>
 
         <div class="publication-results" style="margin-top:2rem;">
-          <img width="100%" src="./static/imgs/agbref.png" alt="Predicted vs. AGBRef AGB for our model and ESA CCI"/>
-          <p class="table-caption has-text-centered">Figure 7. Predicted vs. AGBRef reference AGB for our <code>fcn_film</code>&nbsp;&times;&nbsp;AEF model (left) and ESA CCI (right).
-          Top: per-plot scatter; bottom: binned means with spread. Both saturate at high biomass, tracking the 1:1 line closely below ~150 t/ha.</p>
+          <img width="90%" src="./static/imgs/agbref_scatter.png" alt="Predicted vs. AGBref AGB for our model and ESA CCI"/>
+          <p class="table-caption has-text-centered">Figure 7. Predicted AGB against AGBref reference values aggregated to 10&nbsp;km cells,
+          for <code>fcn_film</code> on AEF (green) and ESA CCI v6.0 (red), on all plots. Top: per-plot scatter with the 1:1 line (dashed),
+          and the distribution of AGBref values (right). Bottom: residuals (predicted &minus; reference, Mg/ha) per AGBref bin. Both
+          underestimate at high biomass; between 100 and 250&nbsp;Mg/ha our model stays closer to zero with a smaller spread.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TAKEAWAYS -->
+<section class="section pt-0">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths" style="width:100%;">
+        <h2 class="title is-3">Takeaways for practitioners</h2>
+        <div class="content has-text-justified">
+          <p>
+            The decisive property of a GFM for biomass estimation is the information its representation encodes. AEF and TESSERA
+            distill a full year of multi-modal observations per pixel; most other GFMs see a single, mostly optical acquisition,
+            and fine-tuning cannot supply the information that is missing. When the representation is rich enough, a lightweight
+            head suffices: an MLP on AEF embeddings beats the supervised state of the art at a fraction of the cost, since the
+            embeddings are pre-computed and no GPU-intensive feature extraction is needed.
+          </p>
+          <p>
+            Pre-computed embeddings come with constraints. Their producer fixes the input sensors, the temporal aggregation and the
+            spatial resolution, and since AEF's weights are not released, its embeddings cannot be fine-tuned or generated for
+            other time periods. TESSERA, the second-best GFM in our benchmark, releases both its weights and its embeddings,
+            offering an open alternative.
+          </p>
         </div>
       </div>
     </div>
@@ -501,7 +613,14 @@
 <section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
     <h2 class="title">Citation</h2>
-    <p>Citation coming soon — we'll add the arXiv reference here once the preprint is ready.</p>
+    <pre><code>@misc{https://doi.org/10.48550/arxiv.2608.04792,
+  doi = {10.48550/ARXIV.2608.04792},
+  url = {https://arxiv.org/abs/2608.04792},
+  author = {Sialelli,  Ghjulia and Scheibenreif,  Linus and Wegner,  Jan Dirk and Schindler,  Konrad},
+  title = {Above-ground Biomass Estimation with Geospatial Foundation Models},
+  publisher = {arXiv},
+  year = {2026}
+}</code></pre>
   </div>
 </section>
 
